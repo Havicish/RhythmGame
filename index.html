@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="Canvas" style="position: fixed; inset: 0px;"></canvas>
+  <audio id="Song"></audio>
+</body>
+</html>
+
+<script>
+
+class Staff {
+  constructor() {
+    this.keys = [];
+    this.splashes = [];
+    this.accuracyHits = [];
+    this.bpm = 1;
+    this.lastBeat = 0;
+    this.lastWholeBeat = 0;
+    this.noteHits = [];
+    this.misses = 0;
+    this.notesPerSecond = 0;
+    this.secondsToRemoveFromNPS = 10;
+    this.currentChart = null;
+  }
+
+  makeKeys(number) {
+    const layouts = {
+      1: [" "],
+      2: ["f", "j"],
+      3: ["f", " ", "j"],
+      4: ["d", "f", "j", "k"],
+      5: ["d", "f", " ", "j", "k"],
+      6: ["s", "d", "f", "j", "k", "l"],
+      7: ["s", "d", "f", " ", "j", "k", "l"],
+      8: ["a", "s", "d", "f", "j", "k", "l", ";"],
+      9: ["a", "s", "d", "f", " ", "j", "k", "l", ";"],
+      10: ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"]
+    };
+
+    const keyCodesToUse = layouts[number];
+
+    for (let i = 0; i < number; i++) {
+      const newKey = new Key();
+
+      newKey.key = keyCodesToUse[i];
+
+      newKey.x =
+        ((i + 0.5) / number) * innerWidth / 2 +
+        innerWidth / 4;
+
+      newKey.y = innerHeight - 75;
+      newKey.bpm = this.bpm;
+      newKey.hue = i / number * 360;
+      newKey.staff = this;
+
+      this.keys.push(newKey);
+    }
+  }
+
+  loadChart(chartJson) {
+    const chartBpm = Number(chartJson.bpm);
+    if (Number.isFinite(chartBpm) && chartBpm > 0) {
+      this.bpm = chartBpm;
+    }
+
+    let chartSongSpeed = Number(chartJson.songSpeed || 1);
+    if (!Number.isFinite(chartSongSpeed)) {
+      chartSongSpeed = 1;
+    }
+    chartSongSpeed = Math.min(Math.max(chartSongSpeed, 0.1), 4);
+    audio.playbackRate = chartSongSpeed;
+
+    for (let key of this.keys) {
+      key.notes = [];
+      key.bpm = this.bpm;
+    }
+
+    for (let i in chartJson.notes) {
+      const note = chartJson.notes[i];
+      const key = this.keys[note.key];
+      const newNote = new Note();
+      newNote.beatToHit = note.beatToHit;
+      newNote.endY = this.keys[note.key].y;
+      newNote.x = this.keys[note.key].x;
+      newNote.type = note.type;
+      newNote.parent = key;
+      newNote.bpm = key.bpm;
+      newNote.hue = key.hue;
+      if (newNote.type == "hold") {
+        newNote.holdDuration = note.holdDuration;
+      }
+      key.notes.push(newNote);
+    }
+    chartStartSeconds = chartJson.start * (60 / this.bpm);
+    audio.currentTime = chartStartSeconds;
+    this.currentChart = chartJson;
+    this.misses = 0;
+    this.noteHits = [];
+    this.notesPerSecond = 0;
+  }
+
+  keyPressed(time, key) {
+    for (let keyObj of this.keys) {
+      keyObj.keyPressed(time, key);
+    }
+  }
+
+  keyReleased(time, key) {
+    for (let keyObj of this.keys) {
+      keyObj.keyReleased(time, key);
+    }
+  }
+
+  frameUpdate(delta, songTime) {
+    const beat = songTime / (60/this.bpm);
+    const wholeBeat = Math.floor(beat);
+
+    for (let key of this.keys) {
+      key.frameUpdate(delta, songTime, beat, this.lastBeat);
+    }
+    for (let splash of this.splashes) {
+      splash.frameUpdate(delta);
+    }
+    for (let hit of this.accuracyHits) {
+      hit.frameUpdate(delta);
+    }
+
+    if (wholeBeat > this.lastWholeBeat) {
+      bgLight = 9;
+    }
+
+    this.songTime = songTime;
+
+    // go back to menu when song ends
+    if (songTime >= audio.duration - 0.1) {
+      mainMenu.isInMenu = true;
+      audio.pause();
+    }
+
+    this.lastBeat = beat;
+    this.lastWholeBeat = wholeBeat;
+  }
+
+  render() {
+    if (!this.currentChart)
+      return;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(innerWidth * (1/6), 80, innerWidth * (2/3), 10);
+    ctx.fillStyle = "#000";
+    const perceivedSongTime = getPerceivedSongTime();
+    let songPercent = (perceivedSongTime - this.currentChart.start * (60 / this.bpm)) / ((this.currentChart.notes[this.currentChart.notes.length - 1].beatToHit - this.currentChart.start) * (60 / this.bpm));
+    songPercent = Math.min(Math.max(songPercent, 0), 1);
+    ctx.fillRect(innerWidth * (1/6) + 2.5, 82.5, Math.max(innerWidth * (2/3) * songPercent - 5, 0), 5);
+
+    for (let hit of this.accuracyHits) {
+      hit.render();
+    }
+    for (let key of this.keys) {
+      key.render();
+    }
+    for (let splash of this.splashes) {
+      splash.render();
+    }
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "36px Arial";
+    ctx.textAlign = "center"
+    ctx.textBaseline = "middle";
+
+    let acc = 0;
+    for (let acc2 of this.noteHits) {
+      acc += acc2;
+    }
+    acc = Math.floor(acc / this.noteHits.length * 1000) / 10;
+
+    ctx.fillText(`Misses: ${this.misses} | NPS: ${this.notesPerSecond / this.secondsToRemoveFromNPS} | Acc: ${acc}% | Beat: ${Math.floor(this.lastBeat)}`, innerWidth / 2, 36);
+  }
+
+  // delete any objects with the "shouldDie" property set to true
+  cleanUpDeaths() {
+    for (let i = this.keys.length - 1; i >= 0; i--) {
+      this.keys[i].cleanUpDeaths();
+      if (this.keys[i].shouldDie)
+        this.keys.splice(i, 1);
+    }
+    for (let i = this.splashes.length - 1; i >= 0; i--) {
+      if (this.splashes[i].shouldDie)
+        this.splashes.splice(i, 1);
+    }
+    for (let i = this.accuracyHits.length - 1; i >= 0; i--) {
+      if (this.accuracyHits[i].shouldDie)
+        this.accuracyHits.splice(i, 1);
+    }
+  }
+}
+
+class Key {
+  constructor() {
+    this.x = 0;
+    this.y = 0;
+    this.notes = [];
+    this.misses = [];
+    this.size = 80;
+    this.bpm = 0;
+    this.hue = 0;
+    this.key = "";
+    this.text = "";
+    this.staff = null;
+    this.isDown = false;
+    this.currentlyHolding = null;
+    this.shouldDie = false;
+  }
+
+  keyPressed(time, key) {
+    if (key != this.key || this.isDown)
+      return;
+
+    this.isDown = true;
+
+    let closestNote = null;
+    let distance = Infinity;
+    let difference = 0;
+
+    for (let note of this.notes) {
+      const currentBeat = getPerceivedSongTime() / (60 / this.bpm);
+
+      const diff = note.beatToHit - currentBeat;
+      const dist = Math.abs(diff);
+
+      const diffMillies = diff * (60 / this.bpm) * 1000;
+      const distMillies = Math.abs(diffMillies);
+
+      if (distMillies > 135)
+        continue;
+
+      if (distance < distMillies)
+        continue;
+
+      distance = distMillies;
+      closestNote = note;
+      difference = diffMillies;
+    }
+
+    if (closestNote) {
+      if (closestNote.type == "normal") {
+        closestNote.shouldDie = true;
+      } else if (closestNote.type == "hold") {
+        closestNote.isHolding = true;
+        this.currentlyHolding = closestNote;
+      }
+      const newHit = new AccuracyHit(innerWidth / 2, innerHeight / 2, difference);
+      this.staff.accuracyHits.push(newHit);
+      if (distance < 45) {
+        const newSplash = new Splash(this.x, this.y, "perfect");
+        this.staff.splashes.push(newSplash);
+      }
+      this.staff.noteHits.push((135 - distance) / 135);
+      this.staff.notesPerSecond += 1;
+      setTimeout(() => {
+        this.staff.notesPerSecond -= 1;
+      }, this.staff.secondsToRemoveFromNPS * 1000);
+    } else {
+      this.staff.misses += 1;
+      this.staff.noteHits.push(0);
+    }
+  }
+
+  keyReleased(time, key) {
+    if (key != this.key)
+      return;
+
+    this.isDown = false;
+
+    if (this.currentlyHolding) {
+      const currentBeat = getPerceivedSongTime() / (60 / this.bpm);
+
+      const diff = this.currentlyHolding.holdDuration + this.currentlyHolding.beatToHit - currentBeat;
+      const distMillies = Math.abs(diff * (60 / this.bpm) * 1000);
+
+      if (distMillies > 135) {
+        this.staff.misses += 1;
+        this.staff.noteHits.push(0);
+        const note = this.currentlyHolding
+        note.shouldDie = true;
+        const newMiss = new Miss(note.x, note.y, note.holdY - note.y, true);
+        this.misses.push(newMiss);
+        this.currentlyHolding = null;
+      }
+    }
+  }
+
+  cleanUpDeaths() {
+    for (let i = this.notes.length - 1; i >= 0; i--) {
+      if (this.notes[i].shouldDie) {
+        if (this.notes[i].countedAsMiss) {
+          this.staff.misses += 1;
+          this.staff.noteHits.push(0);
+        }
+        if (this.currentlyHolding == this.notes[i]) {
+          this.currentlyHolding = null;
+        }
+        this.notes.splice(i, 1);
+      }
+    }
+    for (let i = this.misses.length - 1; i >= 0; i--) {
+      if (this.misses[i].shouldDie)
+        this.misses.splice(i, 1);
+    }
+  }
+
+  frameUpdate(delta, songTime, beat, lastBeat) {
+    for (let note of this.notes) {
+      note.frameUpdate(delta, songTime);
+    }
+    for (let miss of this.misses) {
+      miss.frameUpdate(delta);
+    }
+
+    // if (hasNoteHappened(beat, lastBeat, 16)) {
+    //   if (Math.random() < 0.125) {
+    //     const newNote = new Note();
+    //     newNote.endY = this.y;
+    //     newNote.x = this.x;
+    //     newNote.beatToHit = beat + 2;
+    //     newNote.bpm = this.bpm;
+    //     newNote.hue = this.hue;
+    //     newNote.parent = this;
+    //     this.notes.push(newNote);
+    //   }
+    // }
+  }
+
+  render() {
+    let s = 25;
+    let l = 35;
+    if (this.isDown) {
+      s = 100;
+      l = 50;
+    }
+    ctx.fillStyle = `hsl(${this.hue}, ${s}%, ${l}%)`;
+    ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+
+    for (let note of this.notes) {
+      note.render();
+    }
+    for (let miss of this.misses) {
+      miss.render();
+    }
+  }
+}
+
+class Note {
+  constructor() {
+    this.x = 0;
+    this.y = -100;
+    this.startY = -100;
+    this.endY = 0;
+    this.beatToHit = 0;
+    this.type = "normal";
+    this.speed = 1.5;
+    this.size = 70;
+    this.songTime = 0;
+    this.bpm = 0;
+    this.hue = 0;
+    this.text = "";
+    this.parent = null;
+    this.holdDuration = null;
+    this.holdY = null;
+    this.isHolding = false;
+    this.shouldDie = false;
+    this.countedAsMiss = false;
+  }
+
+  frameUpdate(delta, songTime) {
+    this.songTime = songTime;
+    const beatDuration = 60 / this.bpm;
+
+    const hitTime = this.beatToHit * beatDuration;
+    const timeUntilHit = hitTime - this.songTime;
+
+    const holdTime = (this.beatToHit + this.holdDuration) * beatDuration;
+    const timeUntilHold = holdTime - this.songTime;
+
+    this.y = this.endY - (timeUntilHit * 1000 * this.speed);
+    this.holdY = this.endY - (timeUntilHold * 1000 * this.speed);
+
+    if (this.type == "normal") {
+      if (this.y > innerHeight + 30) {
+        this.shouldDie = true;
+        this.countedAsMiss = true;
+        const newMiss = new Miss(this.x, this.y - 20);
+        this.parent.misses.push(newMiss);
+      }
+    } else {
+      if (this.isHolding) {
+        this.y = Math.min(this.endY, this.y);
+
+        if (this.holdY >= this.y) {
+          this.shouldDie = true;
+        }
+      } else {
+        if (Math.min(this.y, this.holdY) > innerHeight + 30) {
+          this.shouldDie = true;
+          this.countedAsMiss = true;
+          const newMiss = new Miss(this.x, this.y, this.holdY - this.y);
+          this.parent.misses.push(newMiss);
+        }
+      }
+    }
+  }
+
+  render() {
+    const y = this.y;
+    
+    ctx.fillStyle = `hsl(${this.hue}, 40%, 30%)`;
+    this.size *= 0.8;
+    ctx.fillRect(this.x - this.size / 2, this.y, this.size, this.holdY - this.y);
+    this.size /= 0.8;
+
+    if (!this.isHolding) {
+      ctx.fillStyle = `hsl(${this.hue}, 50%, 40%)`;
+      ctx.fillRect(this.x - this.size / 2, y - this.size / 2, this.size, this.size);
+    }
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "48px Arial";
+    ctx.fillText(this.text, this.x, y);
+  }
+}
+
+class Miss {
+  constructor(x, y, tailLength, skipBody = false) {
+    this.x = x;
+    this.y = y;
+    this.xMove = (Math.random() - 0.5) * 25;
+    this.yMove = -100;
+    this.timeToLive = 1.5;
+    this.size = 70;
+    this.tailLength = tailLength;
+    this.skipBody = skipBody;
+    this.shouldDie = false;
+
+    if (this.tailLength == null)
+      this.timeToLive *= 1.5;
+  }
+
+  frameUpdate(delta) {
+    this.x += this.xMove * delta;
+    this.y += this.yMove * delta;
+
+    this.timeToLive -= delta;
+
+    if (this.timeToLive <= 0) {
+      this.shouldDie = true;
+    }
+  }
+
+  render() {
+    ctx.fillStyle = `rgba(255, 0, 0, ${this.timeToLive / 5})`;
+    if (!this.skipBody)
+      ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+    if (this.tailLength) {
+      this.size *= 0.8;
+      ctx.fillRect(this.x - this.size / 2, this.y, this.size, this.tailLength);
+      this.size /= 0.8;
+    }
+  }
+}
+
+class AccuracyHit {
+  constructor(x, y, millies) {
+    this.x = x;
+    this.y = y;
+    this.millies = -Math.floor(millies * 100) / 100;
+    this.timeToLive = 2;
+    this.shouldDie = false;
+  }
+
+  frameUpdate(delta) {
+    this.timeToLive -= delta;
+
+    if (this.timeToLive <= 0)
+      this.shouldDie = true;
+  }
+
+  render() {
+    if (this.millies >= 0) {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "24px Arial";
+      ctx.fillStyle = "#0008";
+      let len = ctx.measureText(`+${this.millies}ms`);
+      ctx.fillRect(innerWidth / 2 - len.width / 2 - 10, innerHeight / 2 - 20, len.width + 20, 40);
+      ctx.fillStyle = "#0f0";
+      ctx.fillText(`+${this.millies}ms`, this.x, this.y);
+    } else {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "24px Arial";
+      ctx.fillStyle = "#0008";
+      let len = ctx.measureText(`+${this.millies}ms`);
+      ctx.fillRect(innerWidth / 2 - len.width / 2 - 10, innerHeight / 2 - 20, len.width + 20, 40);
+      ctx.fillStyle = "#f00";
+      ctx.fillText(`-${-this.millies}ms`, this.x, this.y);
+    }
+  }
+}
+
+class Splash {
+  constructor(x, y, type) {
+    this.x = x;
+    this.y = y;
+    this.type = type;
+    this.timeAlive = 0;
+    this.shouldDie = false;
+  }
+
+  frameUpdate(delta) {
+    this.timeAlive += delta;
+    this.shouldDie = this.timeAlive >= 0.33;
+  }
+
+  render() {
+    ctx.fillStyle = `rgba(255, 255, 255, ${(0.33 - this.timeAlive) * 1.5})`;
+    let size = 150 * this.timeAlive + 50;
+    ctx.fillRect(this.x - size / 2, this.y - size / 2, size, size);
+  }
+}
+
+class Menu {
+  constructor() {
+    this.songs = [];
+    this.songIndex = 0;
+    this.scrollY = 0;
+    this.isInMenu = true;
+    this.mouseX = 0;
+    this.mouseY = 0;
+  }
+
+  keyPressed(time, key) {
+    if (!this.isInMenu)
+      return;
+    if (key == "ArrowDown" || key == "s") {
+      this.songIndex = Math.min(this.songIndex + 1, this.songs.length - 1);
+    } else if (key == "ArrowUp" || key == "w") {
+      this.songIndex = Math.max(this.songIndex - 1, 0);
+    }
+    if (key == "7") {
+      const song = this.songs[this.songIndex];
+      if (song) {
+        song.openInEditor();
+      }
+    }
+    if (key == " " || key == "Enter") {
+      this.songs[this.songIndex].play();
+    }
+  }
+
+  frameUpdate(delta) {
+    const targetY = -this.songIndex * 100 + innerHeight / 2;
+    this.scrollY += (targetY - this.scrollY) * delta * 10;
+    for (let song of this.songs) {
+      song.frameUpdate(delta);
+    }
+  }
+
+  render() {
+    for (let song of this.songs) {
+      song.render();
+    }
+  }
+}
+
+class Song {
+  constructor() {
+    this.name = "";
+    this.artist = "";
+    this.songLength = 0;
+    this.difficulty = "";
+    this.chart = null;
+    this.y = 0;
+    this.index = 0;
+    this.parent = null;
+  }
+
+  fetchChartJson() {
+    return fetch(this.chart, { cache: "no-store" })
+      .then(res => res.json());
+  }
+
+  frameUpdate(delta) {
+    if (!this.parent)
+      return;
+    this.index = this.parent.songs.indexOf(this);
+    this.y = this.parent.scrollY + this.index * 100;
+  }
+
+  render() {
+    let difficultyColors = {
+      "Easy": "#0f0",
+      "Normal": "#ff0",
+      "Hard": "#f00",
+      "V. Hard": "#800",
+      "Insane": "#f0f",
+      "Extreme": "#40f",
+      "Die": "#444"
+    };
+    let bold = false;
+    if (this.parent.songIndex == this.index)
+      bold = true;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `${bold ? "bold " : ""}${bold ? "36" : "24"}px Arial`;
+    ctx.fillStyle = difficultyColors[this.difficulty] || "#fff";
+    ctx.fillText(`${this.name}`, innerWidth / 2, this.y);
+    ctx.font = `${bold ? "bold " : ""}${bold ? "24" : "18"}px Arial`;
+    const songLengthMinutes = Math.floor(this.songLength / 60);
+    const songLengthSeconds = Math.floor(this.songLength % 60).toString().padStart(2, "0");
+    ctx.fillText(`${this.artist} | ${songLengthMinutes}:${songLengthSeconds} | ${this.difficulty}`, innerWidth / 2, this.y + 40);
+  }
+
+  play() {
+    this.fetchChartJson()
+      .then(chartJson => {
+        if (chartJson.audioSrc) {
+          audio.src = chartJson.audioSrc;
+        }
+        mainStaff.keys.forEach(k => k.notes = []);
+        mainStaff.loadChart(chartJson);
+        mainMenu.isInMenu = false;
+        tryStartPlayback();
+      })
+      .catch(err => console.error("Failed to load chart:", err));
+  }
+
+  openInEditor() {
+    this.fetchChartJson()
+      .then(chartJson => {
+        if (chartJson.audioSrc) {
+          audio.src = chartJson.audioSrc;
+        }
+        mainChartEditor.openSong(this, chartJson);
+      })
+      .catch(err => console.error("Failed to open chart editor:", err));
+  }
+}
+
+function hasNoteHappened(beat, lastBeat, divider) {
+  const interval = 4 / divider;
+
+  return Math.floor(beat / interval) >
+    Math.floor(lastBeat / interval);
+}
+
+class ChartEditor {
+  constructor() {
+    this.keys = [];
+    this.currentSong = null;
+    this.songTime = 0;
+    this.bpm = 155.1;
+    this.currentChart = null;
+    this.isInChartEditor = false;
+    this.mouseX = 0;
+    this.mouseY = 0;
+    this.snapValues = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48];
+    this.snapIndex = 2;
+    this.snapShortcutMap = {
+      "1": 0,
+      "2": 1,
+      "3": 2,
+      "4": 3,
+      "5": 4,
+      "6": 5,
+      "7": 6,
+      "8": 7,
+      "9": 8,
+      "0": 9
+    };
+    this.defaultHoldBeats = 1;
+    this.placeHoldNotes = false;
+    this.selectedNote = null;
+    this.gridPaddingTop = 96;
+    this.gridPaddingBottom = 72;
+    this.hitLineY = innerHeight * 0.75;
+    this.pixelsPerBeat = 96;
+    this.zoomY = 1;
+    this.minZoomY = 0.35;
+    this.maxZoomY = 3.5;
+    this.wheelSeekMultiplier = 0.2;
+    this.songSpeedStep = 0.05;
+    this.notePopDuration = 0.14;
+    this.lastPlaybackBeat = 0;
+    this.maxGridLines = 220;
+    this.maxHoldRenderLookbackBeats = 24;
+    this.fps = 0;
+    this.fpsSampleElapsed = 0;
+    this.fpsSampleFrames = 0;
+    this.activePopNotes = [];
+    this.controlsText = "7 from menu opens editor | Click add/select | Right click delete | Wheel scroll (5x slower) | Ctrl+Wheel zoom | Z/X zoom | V/B speed -/+ | Space play/pause | 1-0 snap presets | ,/. snap step | T straight/triplet | [ ] hold len | H toggle hold mode | O copy JSON | Esc back";
+    this.controlsTextCache = {
+      maxWidth: 0,
+      lines: []
+    };
+    this.makeKeys(4);
+  }
+
+  makeKeys(number) {
+    this.keys = [];
+
+    for (let i = 0; i < number; i++) {
+      const hue = i / number * 360;
+      this.keys.push({
+        notes: [],
+        hue,
+        noteColor: `hsl(${hue}, 80%, 58%)`,
+        holdTailColor: `hsla(${hue}, 70%, 55%, 0.45)`,
+        selectedStrokeColor: `hsl(${hue}, 80%, 50%)`,
+        maxHoldDuration: 0,
+        playbackCursor: 0
+      });
+    }
+  }
+
+  openSong(song, chartJson) {
+    this.currentSong = song;
+    this.isInChartEditor = true;
+    mainMenu.isInMenu = false;
+    audio.pause();
+    this.loadChart(chartJson);
+
+    if (this.currentChart && this.currentChart.audioSrc) {
+      audio.src = this.currentChart.audioSrc;
+    }
+
+    audio.playbackRate = this.currentChart.songSpeed;
+    chartStartSeconds = this.currentChart.start * this.getBeatDuration();
+    audio.currentTime = chartStartSeconds;
+    this.songTime = chartStartSeconds;
+    this.resetPlaybackState(this.songTime / this.getBeatDuration());
+  }
+
+  loadChart(chartJson) {
+    const parsedBpm = Number(chartJson.bpm);
+    if (Number.isFinite(parsedBpm) && parsedBpm > 0) {
+      this.bpm = parsedBpm;
+    }
+
+    const chartNotes = Array.isArray(chartJson.notes) ? chartJson.notes : [];
+    const keyCount = Math.max(4, ...chartNotes.map(note => Number(note.key) + 1));
+    this.makeKeys(keyCount);
+
+    this.currentChart = {
+      start: Number(chartJson.start || 0),
+      songSpeed: Math.min(Math.max(Number(chartJson.songSpeed || 1) || 1, 0.1), 4),
+      audioSrc: chartJson.audioSrc || "",
+      bpm: this.bpm,
+      notes: []
+    };
+
+    for (let key of this.keys) {
+      key.notes = [];
+    }
+
+    for (let i in chartNotes) {
+      const note = chartNotes[i];
+      const key = this.keys[note.key];
+      if (!key) {
+        continue;
+      }
+
+      const newNote = {
+        beatToHit: Number(note.beatToHit || 0),
+        type: note.type == "hold" ? "hold" : "normal",
+        holdDuration: Math.max(Number(note.holdDuration || 0), 0),
+        hue: key.hue,
+        popTimer: 0
+      };
+
+      key.notes.push(newNote);
+    }
+
+    this.sortNotes();
+    this.selectedNote = null;
+    this.songTime = this.currentChart.start * this.getBeatDuration();
+    this.resetPlaybackState(this.songTime / this.getBeatDuration());
+  }
+
+  outputJson() {
+    const chartJson = this.buildChartJson();
+
+    navigator.clipboard.writeText(JSON.stringify(chartJson, null, 2)).then(() => {
+      alert("Chart JSON copied to clipboard!");
+    }).catch(err => {
+      console.error("Failed to copy chart JSON to clipboard:", err);
+      alert("Failed to copy chart JSON to clipboard. See console for details.");
+    });
+  }
+
+  keyPressed(time, key) {
+    if (!this.isInChartEditor)
+      return;
+
+    if (this.snapShortcutMap[key] != null) {
+      this.snapIndex = this.snapShortcutMap[key];
+      return;
+    }
+
+    if (key == ",") {
+      this.changeSnapIndex(-1);
+      return;
+    }
+
+    if (key == ".") {
+      this.changeSnapIndex(1);
+      return;
+    }
+
+    if (key == "t") {
+      this.toggleTripletSnap();
+      return;
+    }
+
+    if (key == " ") {
+      if (audio.paused) {
+        audio.currentTime = this.songTime;
+        tryStartPlayback();
+      } else {
+        audio.pause();
+      }
+      return;
+    }
+
+    if (key == "ArrowUp" || key == "w") {
+      this.seekByBeats(-this.getSnapStep());
+      return;
+    }
+
+    if (key == "ArrowDown" || key == "s") {
+      this.seekByBeats(this.getSnapStep());
+      return;
+    }
+
+    if (key == "PageUp") {
+      this.seekByBeats(-4);
+      return;
+    }
+
+    if (key == "PageDown") {
+      this.seekByBeats(4);
+      return;
+    }
+
+    if (key == "Home") {
+      this.seekToBeat(this.currentChart ? this.currentChart.start : 0);
+      return;
+    }
+
+    if (key == "Delete" || key == "Backspace") {
+      this.deleteSelectedNote();
+      return;
+    }
+
+    if (key == "h") {
+      this.toggleHoldMode();
+      return;
+    }
+
+    if (key == "[") {
+      this.adjustHoldDuration(-this.getSnapStep());
+      return;
+    }
+
+    if (key == "]") {
+      this.adjustHoldDuration(this.getSnapStep());
+      return;
+    }
+
+    if (key == "-") {
+      this.changeBpm(-1);
+      return;
+    }
+
+    if (key == "=" || key == "+") {
+      this.changeBpm(1);
+      return;
+    }
+
+    if (key == "o") {
+      this.outputJson();
+      return;
+    }
+
+    if (key == "z") {
+      this.adjustZoom(0.9);
+      return;
+    }
+
+    if (key == "x") {
+      this.adjustZoom(1.1);
+      return;
+    }
+
+    if (key == "v") {
+      this.adjustSongSpeed(-this.songSpeedStep);
+      return;
+    }
+
+    if (key == "b") {
+      this.adjustSongSpeed(this.songSpeedStep);
+    }
+  }
+
+  keyReleased(time, key) {
+
+  }
+
+  frameUpdate(delta, songTime) {
+    if (!this.isInChartEditor)
+      return;
+
+    this.fpsSampleElapsed += delta;
+    this.fpsSampleFrames += 1;
+    if (this.fpsSampleElapsed >= 0.25) {
+      this.fps = this.fpsSampleFrames / this.fpsSampleElapsed;
+      this.fpsSampleElapsed = 0;
+      this.fpsSampleFrames = 0;
+    }
+
+    this.hitLineY = innerHeight * 0.75;
+    const basePixelsPerBeat = Math.max((innerHeight - this.gridPaddingTop - this.gridPaddingBottom) / 6.5, 56);
+    this.pixelsPerBeat = basePixelsPerBeat * this.zoomY;
+
+    if (!audio.paused) {
+      this.songTime = songTime;
+    }
+
+    if (audio.ended) {
+      audio.pause();
+      this.songTime = Math.max(audio.duration || 0, this.songTime);
+    }
+
+    const currentBeat = this.songTime / this.getBeatDuration();
+    if (!audio.paused) {
+      const movedForward = currentBeat >= this.lastPlaybackBeat;
+      for (let key of this.keys) {
+        if (!movedForward) {
+          key.playbackCursor = this.upperBoundByBeat(key.notes, currentBeat);
+          continue;
+        }
+
+        while (key.playbackCursor < key.notes.length && key.notes[key.playbackCursor].beatToHit <= currentBeat) {
+          const note = key.notes[key.playbackCursor];
+          if (note.beatToHit > this.lastPlaybackBeat) {
+            note.popTimer = this.notePopDuration;
+            this.activePopNotes.push(note);
+          }
+          key.playbackCursor += 1;
+        }
+      }
+
+      for (let i = this.activePopNotes.length - 1; i >= 0; i--) {
+        const note = this.activePopNotes[i];
+        note.popTimer = Math.max(0, note.popTimer - delta);
+        if (note.popTimer <= 0) {
+          this.activePopNotes.splice(i, 1);
+        }
+      }
+    } else if (this.activePopNotes.length) {
+      for (let note of this.activePopNotes) {
+        note.popTimer = 0;
+      }
+      this.activePopNotes = [];
+    }
+
+    this.lastPlaybackBeat = currentBeat;
+  }
+
+  render() {
+    if (!this.isInChartEditor)
+      return;
+
+    const gridRect = this.getGridRect();
+    const beatDuration = this.getBeatDuration();
+    const currentBeat = this.songTime / beatDuration;
+    const visibleBeatSpan = (gridRect.bottom - this.gridPaddingTop) / this.pixelsPerBeat;
+    const minBeat = Math.max(0, currentBeat - visibleBeatSpan * 0.35);
+    const maxBeat = currentBeat + visibleBeatSpan * 0.75;
+    const snapStep = this.getSnapStep();
+    const verticalCullingBeatPadding = 120 / this.pixelsPerBeat;
+    const beatRange = Math.max(maxBeat - minBeat, snapStep);
+    const estimatedGridLines = beatRange / Math.max(snapStep, 0.0001);
+    const gridStepMultiplier = estimatedGridLines > this.maxGridLines
+      ? Math.ceil(estimatedGridLines / this.maxGridLines)
+      : 1;
+    const gridStep = snapStep * gridStepMultiplier;
+
+    ctx.fillStyle = "#10141c";
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+    ctx.fillStyle = "#161d29";
+    ctx.fillRect(gridRect.left, this.gridPaddingTop, gridRect.width, gridRect.bottom - this.gridPaddingTop);
+
+    for (let lane = 0; lane < this.keys.length; lane++) {
+      const laneRect = this.getLaneRect(lane);
+      ctx.fillStyle = lane % 2 == 0 ? "#1b2431" : "#141b26";
+      ctx.fillRect(laneRect.left, this.gridPaddingTop, laneRect.width, gridRect.bottom - this.gridPaddingTop);
+    }
+
+    const firstBeatLine = Math.floor(minBeat / gridStep) * gridStep;
+    for (let beat = firstBeatLine; beat <= maxBeat + gridStep; beat += gridStep) {
+      const y = this.beatToY(beat, currentBeat);
+      const isWholeBeat = Math.abs(beat - Math.round(beat)) < gridStep * 0.25;
+      ctx.strokeStyle = isWholeBeat ? "#ffffff55" : "#ffffff22";
+      ctx.lineWidth = isWholeBeat ? 2 : 1;
+      ctx.beginPath();
+      ctx.moveTo(gridRect.left, y);
+      ctx.lineTo(gridRect.right, y);
+      ctx.stroke();
+
+      if (isWholeBeat && this.pixelsPerBeat >= 28) {
+        ctx.fillStyle = "#dfe8ff";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.font = "16px Arial";
+        ctx.fillText(`${Math.round(beat)}`, gridRect.left - 10, y);
+      }
+    }
+
+    for (let lane = 0; lane < this.keys.length; lane++) {
+      const laneKey = this.keys[lane];
+      const laneRect = this.getLaneRect(lane);
+      ctx.strokeStyle = "#ffffff22";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(laneRect.right, this.gridPaddingTop);
+      ctx.lineTo(laneRect.right, gridRect.bottom);
+      ctx.stroke();
+
+      const visibleStartBeat = Math.max(0, minBeat - Math.min(laneKey.maxHoldDuration, this.maxHoldRenderLookbackBeats) - verticalCullingBeatPadding);
+      const visibleEndBeat = maxBeat + verticalCullingBeatPadding;
+      const startIndex = this.lowerBoundByBeat(laneKey.notes, visibleStartBeat);
+
+      for (let i = startIndex; i < laneKey.notes.length; i++) {
+        const note = laneKey.notes[i];
+        if (note.beatToHit > visibleEndBeat) {
+          break;
+        }
+
+        const y = this.beatToY(note.beatToHit, currentBeat);
+        const tailEndY = note.type == "hold"
+          ? this.beatToY(note.beatToHit + note.holdDuration, currentBeat)
+          : y;
+        const noteMinY = Math.min(y, tailEndY);
+        const noteMaxY = Math.max(y, tailEndY);
+        if (noteMaxY < this.gridPaddingTop - 120 || noteMinY > gridRect.bottom + 120) {
+          continue;
+        }
+
+        const noteWidth = laneRect.width * 0.72;
+        const noteLeft = laneRect.left + (laneRect.width - noteWidth) / 2;
+        const noteHeight = 22;
+        const isPassedDuringPlayback = !audio.paused && note.beatToHit <= currentBeat;
+        const popProgress = this.notePopDuration > 0
+          ? Math.max(note.popTimer || 0, 0) / this.notePopDuration
+          : 0;
+        const popScale = 1 + popProgress * 0.2;
+        const drawWidth = noteWidth * popScale;
+        const drawHeight = noteHeight * popScale;
+        const drawLeft = noteLeft - (drawWidth - noteWidth) / 2;
+        const drawY = y - drawHeight / 2;
+        if (note.type == "hold") {
+          ctx.fillStyle = isPassedDuringPlayback
+            ? "rgba(130, 170, 220, 0.33)"
+            : laneKey.holdTailColor;
+          const tailWidth = noteWidth * 0.6;
+          const tailLeft = noteLeft + noteWidth * 0.2;
+          ctx.fillRect(tailLeft, y, tailWidth, tailEndY - y);
+        }
+
+        const isSelected = this.selectedNote == note;
+        const noteFill = isSelected
+          ? "#ffffff"
+          : isPassedDuringPlayback
+            ? "#4e6280"
+            : laneKey.noteColor;
+        ctx.fillStyle = noteFill;
+        ctx.fillRect(drawLeft, drawY, drawWidth, drawHeight);
+        if (isPassedDuringPlayback && popProgress > 0) {
+          ctx.strokeStyle = "#9ed0ff";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(drawLeft - 1, drawY - 1, drawWidth + 2, drawHeight + 2);
+        }
+        if (isSelected) {
+          ctx.strokeStyle = laneKey.selectedStrokeColor;
+          ctx.lineWidth = 2;
+          ctx.strokeRect(drawLeft - 2, drawY - 2, drawWidth + 4, drawHeight + 4);
+        }
+      }
+    }
+
+    ctx.strokeStyle = "#8ef5ff";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(gridRect.left, this.hitLineY);
+    ctx.lineTo(gridRect.right, this.hitLineY);
+    ctx.stroke();
+
+    ctx.fillStyle = "#0b0f16dd";
+    ctx.fillRect(24, 20, innerWidth - 48, 52);
+    ctx.fillStyle = "#f4f7ff";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.font = "20px Arial";
+    const snapLabel = `1/${this.getSnapDivision()}`;
+    const holdLabel = `${Math.round(this.defaultHoldBeats * 100) / 100} beats`;
+    const songLabel = this.currentSong ? this.currentSong.name : "Unsaved Chart";
+    const zoomLabel = `${Math.round(this.zoomY * 100)}%`;
+    const speedLabel = `${Math.round(this.getSongSpeed() * 100)}%`;
+    const fpsLabel = `${Math.round(this.fps)}fps`;
+    ctx.fillText(`${songLabel} | BPM ${this.bpm} | Beat ${currentBeat.toFixed(2)} | Snap ${snapLabel} | Hold ${holdLabel} | Zoom ${zoomLabel} | Speed ${speedLabel} | ${fpsLabel} | Mode ${this.placeHoldNotes ? "Hold" : "Tap"}`, 40, 46);
+
+    ctx.fillStyle = "#0b0f16dd";
+    ctx.font = "15px Arial";
+    const controlsLines = this.getControlsLines(innerWidth - 80);
+    const controlsLineHeight = 18;
+    const controlsPanelHeight = controlsLines.length * controlsLineHeight + 20;
+    const controlsPanelY = innerHeight - controlsPanelHeight - 24;
+    ctx.fillRect(24, controlsPanelY, innerWidth - 48, controlsPanelHeight);
+    ctx.fillStyle = "#d3dcf3";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    for (let i = 0; i < controlsLines.length; i++) {
+      ctx.fillText(controlsLines[i], 40, controlsPanelY + 10 + i * controlsLineHeight);
+    }
+  }
+
+  mouseDown(button) {
+    if (!this.isInChartEditor)
+      return;
+
+    const laneIndex = this.getLaneIndexFromMouse();
+    if (laneIndex === -1)
+      return;
+
+    const beat = this.quantizeBeat(this.yToBeat(this.mouseY, this.songTime / this.getBeatDuration()));
+    const note = this.findClosestNote(laneIndex, beat);
+
+    if (button == 2) {
+      if (note) {
+        this.deleteNote(note, laneIndex);
+      }
+      return;
+    }
+
+    if (note) {
+      this.selectedNote = note;
+      return;
+    }
+
+    const newNote = {
+      beatToHit: beat,
+      type: this.placeHoldNotes ? "hold" : "normal",
+      holdDuration: this.placeHoldNotes ? this.defaultHoldBeats : 0,
+      hue: this.keys[laneIndex].hue,
+      popTimer: 0
+    };
+    this.keys[laneIndex].notes.push(newNote);
+    this.sortNotes();
+    this.resetPlaybackState(this.songTime / this.getBeatDuration());
+    this.selectedNote = newNote;
+  }
+
+  wheel(deltaY, ctrlKey = false, deltaX = 0, shiftKey = false) {
+    if (!this.isInChartEditor)
+      return;
+
+    if (ctrlKey) {
+      this.adjustZoom(deltaY < 0 ? 1.08 : 0.92);
+      return;
+    }
+
+    let scrollSpeed = 1;
+    if (shiftKey)
+      scrollSpeed = 4;
+    const direction = Math.sign(deltaY);
+    this.seekByBeats(direction * this.getSnapStep() * this.wheelSeekMultiplier * scrollSpeed);
+  }
+
+  adjustZoom(multiplier) {
+    this.zoomY = Math.min(this.maxZoomY, Math.max(this.minZoomY, this.zoomY * multiplier));
+  }
+
+  getSongSpeed() {
+    if (!this.currentChart)
+      return 1;
+    return Math.min(Math.max(Number(this.currentChart.songSpeed || 1) || 1, 0.1), 4);
+  }
+
+  adjustSongSpeed(offset) {
+    const nextSpeed = Math.min(Math.max(this.getSongSpeed() + offset, 0.1), 4);
+    if (this.currentChart) {
+      this.currentChart.songSpeed = nextSpeed;
+    }
+    audio.playbackRate = nextSpeed;
+  }
+
+  getBeatDuration() {
+    return 60 / this.bpm;
+  }
+
+  getSnapDivision() {
+    return this.snapValues[this.snapIndex];
+  }
+
+  getSnapStep() {
+    return 1 / this.getSnapDivision();
+  }
+
+  changeSnapIndex(offset) {
+    const maxIndex = this.snapValues.length - 1;
+    this.snapIndex = Math.max(0, Math.min(maxIndex, this.snapIndex + offset));
+  }
+
+  toggleTripletSnap() {
+    const pairs = [
+      [3, 4],
+      [6, 8],
+      [12, 16],
+      [24, 32]
+    ];
+
+    const currentDivision = this.getSnapDivision();
+    for (let pair of pairs) {
+      if (currentDivision == pair[0]) {
+        this.snapIndex = this.snapValues.indexOf(pair[1]);
+        return;
+      }
+      if (currentDivision == pair[1]) {
+        this.snapIndex = this.snapValues.indexOf(pair[0]);
+        return;
+      }
+    }
+
+    this.snapIndex = this.snapValues.indexOf(12);
+  }
+
+  wrapText(text, maxWidth) {
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    for (let word of words) {
+      const candidate = currentLine ? `${currentLine} ${word}` : word;
+      if (ctx.measureText(candidate).width <= maxWidth || !currentLine) {
+        currentLine = candidate;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    return lines;
+  }
+
+  getControlsLines(maxWidth) {
+    if (this.controlsTextCache.maxWidth == maxWidth) {
+      return this.controlsTextCache.lines;
+    }
+
+    this.controlsTextCache.maxWidth = maxWidth;
+    this.controlsTextCache.lines = this.wrapText(this.controlsText, maxWidth);
+    return this.controlsTextCache.lines;
+  }
+
+  getGridRect() {
+    const left = innerWidth * 0.2;
+    const right = innerWidth * 0.8;
+    const bottom = innerHeight - this.gridPaddingBottom;
+    return {
+      left,
+      right,
+      width: right - left,
+      bottom
+    };
+  }
+
+  getLaneRect(index) {
+    const gridRect = this.getGridRect();
+    const laneWidth = gridRect.width / this.keys.length;
+    return {
+      left: gridRect.left + laneWidth * index,
+      right: gridRect.left + laneWidth * (index + 1),
+      width: laneWidth
+    };
+  }
+
+  getLaneIndexFromMouse() {
+    const gridRect = this.getGridRect();
+    if (this.mouseX < gridRect.left || this.mouseX > gridRect.right)
+      return -1;
+    if (this.mouseY < this.gridPaddingTop || this.mouseY > gridRect.bottom)
+      return -1;
+
+    const laneWidth = gridRect.width / this.keys.length;
+    return Math.min(Math.floor((this.mouseX - gridRect.left) / laneWidth), this.keys.length - 1);
+  }
+
+  beatToY(beat, currentBeat) {
+    return this.hitLineY - (beat - currentBeat) * this.pixelsPerBeat;
+  }
+
+  yToBeat(y, currentBeat) {
+    return currentBeat + (this.hitLineY - y) / this.pixelsPerBeat;
+  }
+
+  quantizeBeat(beat) {
+    const step = this.getSnapStep();
+    return Math.max(0, Math.round(beat / step) * step);
+  }
+
+  seekByBeats(beatOffset) {
+    const currentBeat = this.songTime / this.getBeatDuration();
+    this.seekToBeat(currentBeat + beatOffset);
+  }
+
+  seekToBeat(targetBeat) {
+    const clampedBeat = Math.max(targetBeat, 0);
+    this.songTime = clampedBeat * this.getBeatDuration();
+    audio.currentTime = this.songTime;
+    this.resetPlaybackState(clampedBeat);
+  }
+
+  lowerBoundByBeat(notes, beat) {
+    let left = 0;
+    let right = notes.length;
+    while (left < right) {
+      const mid = (left + right) >> 1;
+      if (notes[mid].beatToHit < beat) {
+        left = mid + 1;
+      } else {
+        right = mid;
+      }
+    }
+    return left;
+  }
+
+  upperBoundByBeat(notes, beat) {
+    let left = 0;
+    let right = notes.length;
+    while (left < right) {
+      const mid = (left + right) >> 1;
+      if (notes[mid].beatToHit <= beat) {
+        left = mid + 1;
+      } else {
+        right = mid;
+      }
+    }
+    return left;
+  }
+
+  resetPlaybackState(currentBeat) {
+    this.lastPlaybackBeat = currentBeat;
+    for (let key of this.keys) {
+      key.playbackCursor = this.upperBoundByBeat(key.notes, currentBeat);
+    }
+
+    if (this.activePopNotes.length) {
+      for (let note of this.activePopNotes) {
+        note.popTimer = 0;
+      }
+      this.activePopNotes = [];
+    }
+  }
+
+  findClosestNote(laneIndex, beat) {
+    let closestNote = null;
+    let closestDistance = Infinity;
+    const maxDistance = Math.max(this.getSnapStep() / 2, 0.08);
+
+    for (let note of this.keys[laneIndex].notes) {
+      const distance = Math.abs(note.beatToHit - beat);
+      if (distance >= closestDistance || distance > maxDistance)
+        continue;
+      closestDistance = distance;
+      closestNote = note;
+    }
+
+    return closestNote;
+  }
+
+  deleteSelectedNote() {
+    if (!this.selectedNote)
+      return;
+
+    for (let laneIndex = 0; laneIndex < this.keys.length; laneIndex++) {
+      if (this.deleteNote(this.selectedNote, laneIndex)) {
+        break;
+      }
+    }
+  }
+
+  deleteNote(note, laneIndex) {
+    const notes = this.keys[laneIndex].notes;
+    const noteIndex = notes.indexOf(note);
+    if (noteIndex === -1)
+      return false;
+
+    notes.splice(noteIndex, 1);
+    this.sortNotes();
+    this.resetPlaybackState(this.songTime / this.getBeatDuration());
+    if (this.selectedNote == note) {
+      this.selectedNote = null;
+    }
+    return true;
+  }
+
+  toggleHoldMode() {
+    if (this.selectedNote) {
+      if (this.selectedNote.type == "hold") {
+        this.selectedNote.type = "normal";
+        this.selectedNote.holdDuration = 0;
+      } else {
+        this.selectedNote.type = "hold";
+        this.selectedNote.holdDuration = this.defaultHoldBeats;
+      }
+      return;
+    }
+
+    this.placeHoldNotes = !this.placeHoldNotes;
+  }
+
+  adjustHoldDuration(amount) {
+    const targetNote = this.selectedNote;
+    if (targetNote) {
+      targetNote.type = "hold";
+      targetNote.holdDuration = Math.max(this.getSnapStep(), targetNote.holdDuration + amount);
+      return;
+    }
+
+    this.defaultHoldBeats = Math.max(this.getSnapStep(), this.defaultHoldBeats + amount);
+  }
+
+  changeBpm(amount) {
+    this.bpm = Math.max(1, this.bpm + amount);
+    if (this.currentChart) {
+      this.currentChart.bpm = this.bpm;
+    }
+  }
+
+  sortNotes() {
+    for (let key of this.keys) {
+      key.notes.sort((a, b) => a.beatToHit - b.beatToHit);
+
+      let maxHoldDuration = 0;
+      for (let note of key.notes) {
+        const holdDuration = note.type == "hold" ? Math.max(note.holdDuration || 0, 0) : 0;
+        if (holdDuration > maxHoldDuration) {
+          maxHoldDuration = holdDuration;
+        }
+      }
+      key.maxHoldDuration = maxHoldDuration;
+    }
+  }
+
+  buildChartJson() {
+    const chartJson = {
+      start: this.currentChart ? this.currentChart.start : 0,
+      songSpeed: this.currentChart ? this.currentChart.songSpeed : 1,
+      bpm: this.bpm,
+      notes: []
+    };
+
+    if (this.currentChart && this.currentChart.audioSrc) {
+      chartJson.audioSrc = this.currentChart.audioSrc;
+    }
+
+    for (let laneIndex = 0; laneIndex < this.keys.length; laneIndex++) {
+      for (let note of this.keys[laneIndex].notes) {
+        chartJson.notes.push({
+          key: laneIndex,
+          beatToHit: Math.round(note.beatToHit * 1000) / 1000,
+          type: note.type,
+          holdDuration: note.type == "hold" ? Math.round(note.holdDuration * 1000) / 1000 : 0
+        });
+      }
+    }
+
+    chartJson.notes.sort((a, b) => a.beatToHit - b.beatToHit || a.key - b.key);
+    return chartJson;
+  }
+}
+
+let canvas;
+/** @type {CanvasRenderingContext2D} */
+let ctx;
+let audio;
+let audioContext = null;
+let mediaSourceNode = null;
+let chartStartSeconds = 0;
+let chartSongSpeed = 1;
+
+function ensureAudioContext() {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  if (!mediaSourceNode) {
+    mediaSourceNode = audioContext.createMediaElementSource(audio);
+    mediaSourceNode.connect(audioContext.destination);
+  }
+
+  if (audioContext.state === "suspended") {
+    audioContext.resume().catch((err) => {
+      console.warn("AudioContext resume failed:", err);
+    });
+  }
+}
+
+function getOutputLatencySeconds() {
+  if (!audioContext) {
+    return 0;
+  }
+
+  const outputLatency = Number(audioContext.outputLatency || 0);
+  const baseLatency = Number(audioContext.baseLatency || 0);
+  return Math.max(outputLatency, baseLatency, 0);
+}
+
+function getPerceivedSongTime() {
+  if (!audio) {
+    return 0;
+  }
+
+  // Align visuals/input with what the player actually hears from speakers.
+  const speedAdjustedLatency = getOutputLatencySeconds() * Math.max(audio.playbackRate || chartSongSpeed, 0.01);
+  return Math.max(0, audio.currentTime - speedAdjustedLatency);
+}
+
+function tryStartPlayback() {
+  if (!audio) {
+    return;
+  }
+
+  ensureAudioContext();
+
+  if (audio.paused) {
+    audio.play().catch((err) => {
+      console.error("Audio play failed:", err);
+    });
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  canvas = document.getElementById("Canvas");
+  ctx = canvas.getContext("2d");
+
+  audio = document.getElementById("Song");
+  audio.volume = 1;
+
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+
+  mainStaff.makeKeys(4);
+  mainMenu.isInMenu = true;
+
+  const solarEclipseSong = new Song();
+  solarEclipseSong.name = "Solar Eclipse";
+  solarEclipseSong.artist = "Boggio & Cybervortex";
+  solarEclipseSong.songLength = 1 * 60 + 7;
+  solarEclipseSong.chart = "./solarEclipseChart.json";
+  solarEclipseSong.difficulty = "Hard";
+  solarEclipseSong.parent = mainMenu;
+  mainMenu.songs.push(solarEclipseSong);
+  const HUHSong = new Song();
+  HUHSong.name = "HUH>>>>>>?????";
+  HUHSong.artist = "Star";
+  HUHSong.songLength = 2 * 60 + 8;
+  HUHSong.chart = "./HUHChart.json";
+  HUHSong.difficulty = "Normal";
+  HUHSong.parent = mainMenu;
+  mainMenu.songs.push(HUHSong);
+
+  frame();
+});
+
+document.addEventListener("mousemove", (event) => {
+  mainMenu.mouseX = event.clientX;
+  mainMenu.mouseY = event.clientY;
+  mainChartEditor.mouseX = event.clientX;
+  mainChartEditor.mouseY = event.clientY;
+});
+
+document.addEventListener("mousedown", (event) => {
+  if (mainChartEditor.isInChartEditor) {
+    mainChartEditor.mouseDown(event.button);
+  }
+});
+
+document.addEventListener("contextmenu", (event) => {
+  if (mainChartEditor.isInChartEditor) {
+    event.preventDefault();
+  }
+});
+
+document.addEventListener("wheel", (event) => {
+  if (!mainChartEditor.isInChartEditor) {
+    return;
+  }
+
+  event.preventDefault();
+  mainChartEditor.wheel(-event.deltaY, event.ctrlKey, event.deltaX, event.shiftKey);
+}, { passive: false });
+
+document.addEventListener("keydown", (event) => {
+  if (mainChartEditor.isInChartEditor) {
+    mainChartEditor.keyPressed(event.timeStamp, event.key);
+  } else if (mainMenu.isInMenu) {
+    mainMenu.keyPressed(event.timeStamp, event.key);
+  } else {
+    mainStaff.keyPressed(event.timeStamp, event.key);
+  }
+
+  if (event.key == " " && !mainMenu.isInMenu && !mainChartEditor.isInChartEditor) {
+    if (audio.paused) {
+      tryStartPlayback();
+    } else {
+      audio.pause();
+    }
+  }
+
+  if (event.key == "r" && !mainMenu.isInMenu && !mainChartEditor.isInChartEditor) {
+    audio.currentTime = chartStartSeconds;
+    mainStaff.loadChart(mainStaff.currentChart);
+  }
+
+  if (event.key == "Escape") {
+    if (mainChartEditor.isInChartEditor) {
+      mainChartEditor.isInChartEditor = false;
+      mainChartEditor.selectedNote = null;
+      audio.pause();
+      mainMenu.isInMenu = true;
+      return;
+    }
+
+    if (!mainMenu.isInMenu) {
+      mainMenu.isInMenu = true;
+      audio.pause();
+    }
+  }
+});
+
+document.addEventListener("keyup", (event) => {
+  if (mainChartEditor.isInChartEditor) {
+    mainChartEditor.keyReleased(event.timeStamp, event.key);
+  } else {
+    mainStaff.keyReleased(event.timeStamp, event.key);
+  }
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    audio.pause();
+  }
+});
+
+window.addEventListener("resize", () => {
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
+});
+
+window.addEventListener("error", (err) => {
+  alert(err.message);
+  alert(err.lineno);
+});
+
+const mainStaff = new Staff();
+const mainMenu = new Menu();
+const mainChartEditor = new ChartEditor();
+
+let bgLight = 0;
+let songTime = 0;
+let lastRecTime = 0;
+let globalFps = 0;
+let globalFpsSampleElapsed = 0;
+let globalFpsSampleFrames = 0;
+function frame() {
+  const time = performance.now();
+  const delta = (time - lastRecTime) / 1000;
+  lastRecTime = time;
+
+  if (delta > 0) {
+    globalFpsSampleElapsed += delta;
+    globalFpsSampleFrames += 1;
+    if (globalFpsSampleElapsed >= 0.25) {
+      globalFps = globalFpsSampleFrames / globalFpsSampleElapsed;
+      globalFpsSampleElapsed = 0;
+      globalFpsSampleFrames = 0;
+    }
+  }
+
+  if (!audio.paused) {
+    songTime = getPerceivedSongTime();
+  } else {
+    songTime = Math.max(songTime, chartStartSeconds);
+  }
+
+  bgLight *= Math.pow(0.0001, delta);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = `#${Math.floor(bgLight)}00`;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (mainMenu.isInMenu) {
+    mainMenu.frameUpdate(delta);
+    mainMenu.render();
+  } else if (mainChartEditor.isInChartEditor) {
+    mainChartEditor.frameUpdate(delta, songTime);
+    mainChartEditor.render();
+  } else {
+    mainStaff.frameUpdate(delta, songTime);
+    mainStaff.render();
+    mainStaff.cleanUpDeaths();
+  }
+
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.font = "18px Arial";
+  ctx.fillStyle = "#000a";
+  ctx.fillRect(innerWidth - 120, 12, 108, 28);
+  ctx.fillStyle = "#eaf4ff";
+  ctx.fillText(`${Math.round(globalFps)} FPS`, innerWidth - 20, 18);
+
+  requestAnimationFrame(frame);
+}
+
+</script>

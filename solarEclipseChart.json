@@ -1,0 +1,1058 @@
+{
+  "start": 0,
+  "songSpeed": 1,
+  "audioSrc": "SOLAR_ECLIPSE.mp3",
+  "bpm": 155.1,
+  "notes": [
+    {
+      "beatToHit": 8,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 9,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 9.5,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 13,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 14,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 15,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 16,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 17,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 17.5,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 21,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 22,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 23,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 24,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 24.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 25,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 25.5,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 29,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 29.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 30.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 32,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 33,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 33.5,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 35,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 36,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 37,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 37.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 39,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 40,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 41,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 41.5,
+      "type": "hold",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 45,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 46,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 47,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 48,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 49,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 49.5,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 53,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 54,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 55,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 56,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 56.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 57,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 57.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 61,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 61.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 62.5,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 64,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 65,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 65.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 67,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 68,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 69,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 69.5,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 71,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 72,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 73,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 73.5,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 75,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 76,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 76.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 77,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 77.5,
+      "type": "hold",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 79,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 80,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 80.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 81,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 81.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 82.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 83,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 83.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 84,
+      "type": "hold",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 85,
+      "type": "hold",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 86,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 87,
+      "type": "hold",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 88,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 88.33,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 88.66,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 89,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 89.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 89.83,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 90,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 90.5,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 91,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 91.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 92,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 92.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 93,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 93.5,
+      "type": "hold",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 94.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 95,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 95.5,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 96,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 96.33,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 96.66,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 97,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 97.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 97.83,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 98,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 98.5,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 99,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 99.5,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 100,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 100.5,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 101,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 101.5,
+      "type": "hold",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 102.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 103,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 103.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 104,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 105,
+      "type": "hold",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 106,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 106.25,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 106.5,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 106.75,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 107,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 107.25,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 107.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 107.75,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 108,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 108.25,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 108.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 108.75,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 109,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 109.25,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 109.5,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 109.75,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 110,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 110.5,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 111,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 111.5,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 112,
+      "type": "hold",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 113,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 114,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 114.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 115,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 115.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 116,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 116.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 117,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 117.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 118,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 119,
+      "type": "hold",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 120,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 120.5,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 121,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 121.5,
+      "type": "hold",
+      "key": 1,
+      "holdDuration": 1.5
+    },
+    {
+      "beatToHit": 123,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 124,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 124.5,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 125,
+      "type": "normal",
+      "key": 3,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 125.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 126,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 126.5,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 127,
+      "type": "normal",
+      "key": 0,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 127.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 1
+    },
+    {
+      "beatToHit": 128,
+      "type": "hold",
+      "key": 1,
+      "holdDuration": 2
+    },
+    {
+      "beatToHit": 130,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 2
+    },
+    {
+      "beatToHit": 132,
+      "type": "hold",
+      "key": 0,
+      "holdDuration": 2
+    },
+    {
+      "beatToHit": 134,
+      "type": "hold",
+      "key": 2,
+      "holdDuration": 2
+    },
+    {
+      "beatToHit": 136,
+      "type": "hold",
+      "key": 0,
+      "holdDuration": 16
+    },
+    {
+      "beatToHit": 136,
+      "type": "hold",
+      "key": 3,
+      "holdDuration": 16
+    },
+    {
+      "beatToHit": 136,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 137,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 137.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 141,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 142,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 143,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 144,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 145,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 145.5,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 149,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 150,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 151,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 152,
+      "type": "normal",
+      "key": 1,
+      "holdDuration": 8
+    },
+    {
+      "beatToHit": 152,
+      "type": "normal",
+      "key": 2,
+      "holdDuration": 8
+    }
+  ]
+}

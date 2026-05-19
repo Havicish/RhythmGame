@@ -1,0 +1,380 @@
+{
+  "start": 0,
+  "songSpeed": 1,
+  "bpm": 120,
+  "notes": [
+    {
+      "key": 0,
+      "beatToHit": 4,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 4.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 5.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 6,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 6.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 0,
+      "beatToHit": 8,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 8.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 9,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 9.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 10,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 10.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 1,
+      "beatToHit": 11.5,
+      "type": "hold",
+      "holdDuration": 0.5
+    },
+    {
+      "key": 0,
+      "beatToHit": 12,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 12.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 13,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 13.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 14,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 14.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 2,
+      "beatToHit": 16,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 16.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 17,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 17.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 18,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 18.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 2,
+      "beatToHit": 20,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 20.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 21,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 21.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 22,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 22.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 1,
+      "beatToHit": 24,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 24.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 25,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 25.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 26,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 26.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 0,
+      "beatToHit": 27.5,
+      "type": "hold",
+      "holdDuration": 0.5
+    },
+    {
+      "key": 3,
+      "beatToHit": 28,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 28.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 29,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 29.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 30,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 30.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 3,
+      "beatToHit": 32,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 32.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 32.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 33,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 33.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 33.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 34,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 34.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 3,
+      "beatToHit": 34.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 36,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 36.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 36.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 37,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 1,
+      "beatToHit": 37.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 3,
+      "beatToHit": 37.5,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 2,
+      "beatToHit": 38,
+      "type": "normal",
+      "holdDuration": 0
+    },
+    {
+      "key": 0,
+      "beatToHit": 38.5,
+      "type": "hold",
+      "holdDuration": 1.5
+    },
+    {
+      "key": 1,
+      "beatToHit": 38.5,
+      "type": "normal",
+      "holdDuration": 0
+    }
+  ],
+  "audioSrc": "HUH.mp3"
+}
